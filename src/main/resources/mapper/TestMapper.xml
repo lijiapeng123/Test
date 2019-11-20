@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ljp.mapper.TestMapper">
+    <select id="getList" resultType="com.ljp.entity.ExcelEntity">
+        SELECT
+            examp.title as paperTitle,#店检项目名称
+            shopm.warArea,#战区
+            shopm.shopCode,#店面编号
+            shopm.shopName,#店面名称
+            shopm.province,#省份
+            examps.longitude,#答题经度
+            examps.latitude,#答题纬度
+            shopm.address,#店面地址
+            #负责业代
+            shopm.urgetName,#负责督导
+            examps.total_score,#自检得分
+            examps.total_score_reviewed,#复检得分(判断)
+            examps.total_score_appealed,#最终分数
+            examps.answer_start_time,#答题开始时间
+            examps.answer_end_time,#答题结束时间
+            examqs.answer,#所填答案#备注(填空题的答案)
+            examqs.score,#得分(判断 复核，申诉)
+            examq.title as questionTitle, #试题的标题
+            examq.id as questionId,#试题的ID
+            examq.parent_id, #如果不为NULL则为附加题
+            examq.type  #题目类型 附加题只要填空题的答案
+        FROM
+            business_shop.lenovoShop AS shopm
+        LEFT JOIN inspection_shop_self.exam_paper_shop AS examps ON shopm.shopCode = examps.shop_code
+        LEFT JOIN inspection_shop_self.exam_question_shop AS examqs ON examps.id = examqs.exam_paper_shop_id
+        LEFT JOIN inspection_shop_self.exam_paper AS examp ON examp.id = examps.exam_paper_id
+        LEFT JOIN inspection_shop_self.exam_question AS examq ON examq.id = examqs.exam_question_id
+        WHERE
+            examps.exam_paper_id = #{paperId}
+    </select>
+
+    <select id="getParentId" resultType="com.ljp.entity.ExcelEntity">
+        SELECT
+            exam_paper_shop.shop_code,
+            exam_question_shop.exam_question_id,
+            exam_question_shop.answer
+        FROM
+            exam_question_shop
+        LEFT JOIN exam_paper_shop ON exam_question_shop.exam_paper_id = exam_paper_shop.exam_paper_id
+        WHERE
+            exam_question_shop.exam_question_id = #{parentId}
+        AND exam_paper_shop.shop_code = #{shopCode}
+    </select>
+
+</mapper>
